@@ -1,8 +1,12 @@
 # Git Deploy
 
-Deploy a branch after commiting changes to it or merging another branch into it.
+Deploy a branch to a local or mapped directory after commits and merges on the branch.
 
-## Usage
+## Setup
+Copy post-commit and post-merge to the repository's .git/hooks directory.
+
+Specify which branches should be deployed to which directories by creating mappings in a custom git config section. 
+
 To deploy commits for a branch to a local or mapped directory, add a local config item:                                                                
 
 ```
