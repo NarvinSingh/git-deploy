@@ -11,22 +11,22 @@ Specify which branches should be deployed to which directories by creating mappi
 To deploy commits and merges to a branch to a local or mapped directory, add a local config item:                                                                
 
 ```
-git config --local deploy.branch "branch_name /path/to/deploy"           
+git config deploy.branch "branch_name /path/to/deploy"           
 ```
 
 To deploy comits and merges to additional branches, add more mappings to the local config:       
 
 ```
-git config --local --add "branch2 /path/to/deploy2"                      
+git config --add "branch2 /path/to/deploy2"                      
 ```
 
 To deploy comits and merges to the same branch to multiple directories, add more mappings to the local config specifying the same branch again:                              
 
 ```
-git config --local --add "branch2 /second/path/to/deploy2"               
+git config --add "branch2 /second/path/to/deploy2"               
 ```
 
-To clean the deployment directory before deploying a commit or merge, add a config item (note that this option applies to all deployment mappings and will not clean subdirectories that are not part of the commit):                      
+To clean the deployment directory before deploying a commit or merge, add a local config item (note that this option applies to all deployment mappings and will not clean subdirectories that are not part of the commit):                      
 
 ```
 git config deploy.clean true                                             
