@@ -11,6 +11,9 @@ git config --add deploy.branch " ./test/app ./test/no_op"
 # No-op because src is empty
 git config --add deploy.branch "dev '' ./test/no_op"
 
+# No-op because src and dst are empty
+git config --add deploy.branch "dev '' ''"
+
 # No-op because src doesn't exist
 git config --add deploy.branch "dev './test/app_non_existent' ./test/no_op"
 
