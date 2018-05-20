@@ -1,0 +1,21 @@
+#!/bin/bash
+
+git config --unset-all deploy.branch
+
+# No-op because branch is empty
+git config deploy.branch ""
+
+# No-op because branch is empty
+git config --add deploy.branch " ./test/app ./test/no_op"
+
+# No-op because src is empty
+git config --add deploy.branch "dev '' ./test/no_op"
+
+# Deploy single directory without cleaning destination
+git config --add deploy.branch "dev ./test/app ./test/deploy_dirty"
+
+# Deploy single directory without cleaning destination
+git config --add deploy.branch "dev ./test/app ./test/deploy_dirty false"
+
+# Deploy single directory after cleaning destination
+git config --add deploy.branch "dev ./test/app ./test/deploy_clean true"
