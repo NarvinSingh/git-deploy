@@ -11,11 +11,17 @@ git config --add deploy.branch " ./test/app ./test/no_op"
 # No-op because src is empty
 git config --add deploy.branch "dev '' ./test/no_op"
 
-# Deploy single directory without cleaning destination
-git config --add deploy.branch "dev ./test/app ./test/deploy_dirty"
+# No-op because src doesn't exist
+git config --add deploy.branch "dev './test/app_non_existent' ./test/no_op"
+
+# No-op because dst doesn't exist
+git config --add deploy.branch "dev './test/app' './test/deploy_non_existent'"
 
 # Deploy single directory without cleaning destination
-git config --add deploy.branch "dev ./test/app ./test/deploy_dirty false"
+git config --add deploy.branch "dev ./test/app/ ./test/deploy_dirty"
+
+# Deploy single directory without cleaning destination
+git config --add deploy.branch "dev ./test/app ./test/deploy_dirty/ false"
 
 # Deploy single directory after cleaning destination
 git config --add deploy.branch "dev ./test/app ./test/deploy_clean true"
