@@ -6,6 +6,6 @@ git checkout -b feat
 echo 'File that will be merged.' >> "$dir"/app/merge.txt
 git add "$dir"/app/merge.txt
 git commit -m 'Added a file.'
-git checkout -b dev
+git checkout dev
 git merge feat
 git branch -d feat
