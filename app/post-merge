@@ -1,54 +1,72 @@
 #!/bin/bash
-echo -e '\e[32mHook post-merge started.\e[0m'
-echo '#################################################################################'
-echo '#                                                                               #'
-echo '# To deploy merges for a branch to a local or mapped directory, add a local     #'
-echo '# config item:                                                                  #'
-echo '#                                                                               #'
-echo '#    git config --local deploy.branch "branch_name /path/to/deploy"             #'
-echo '#                                                                               #'
-echo '# To deploy additional branches, add more mappings to the local config:         #'
-echo '#                                                                               #'
-echo '#    git config --local --add "branch2 /path/to/deploy2"                        #'
-echo '#                                                                               #'
-echo '# To deploy the same branch to multiple directories, add more mappings to the   #'
-echo '# local config specifying the same branch again:                                #'
-echo '#                                                                               #'
-echo '#    git config --local --add "branch2 /second/path/to/deploy2"                 #'
-echo '#                                                                               #'
-echo '# To clean the deployment directory before deploying the merge, add a config    #'
-echo '# item (note that this option applies to all deployment mappings and will not   #'
-echo '# clean subdirectories that are not part of the merge):                         #'
-echo '#                                                                               #'
-echo '#    git config deploy.clean true                                               #'
-echo '#                                                                               #'
-echo '#################################################################################'
+echo -en "\e[32m"
+cat <<"EOH"
+################################################################################
+#                                                                              #
+# Post-Merge Hook                                                              #
+#                                                                              #
+################################################################################
+EOH
+echo -en "\e[0m"
 
-unset GIT_INDEX_FILE
-export GIT_DIR=./.git
+declare -r IND='    '
 
 this_branch=$( git branch | grep '^\*\s[^\s]' | cut -c 3- )
+this_hash=$( git rev-parse $this_branch )
 is_deployed=false
 
-while read -r line; do
-	read -r branch dir <<< $line
+while IFS=$'\0' read -r deploy_line; do
+    i=0
+    branch=
+    src=
+    dst=
+    clean=
 
-	if [ "$this_branch" == "$branch" ]; then
-		echo -e "\e[32mDeploying branch $this_branch to $dir.\e[0m"
-		
-		if [ $( git config deploy.clean ) == true ]; then
-			echo -e "\e[32mCleaning $dir.\e[0m"
-			
-			git --work-tree $dir clean -f
-		fi
+    while IFS=$'\0' read -r deploy_val; do
+        case "$i" in
+            0) branch="$deploy_val";;
+            1) src="$( sed -E 's/([^\.])\/$/\1/' <<< $deploy_val )";;
+            2) dst="$( sed -E 's/([^\.])\/$/\1/' <<< $deploy_val )";;
+            3) clean="$deploy_val";;
+        esac
 
-		git --work-tree $dir checkout -f
-		is_deployed=true
-	fi
-done < <( git config --get-all deploy.branch ) 
+        ((i++))
+    done < <( echo "$deploy_line" | xargs -n1 )
 
-if [ $is_deployed == false ]; then
-	echo -e "\e[33mDid not deploy branch $this_branch.\e[0m"
+    if [ "$this_branch" == "$branch" ]; then
+        if [ ! -d "$src" ]; then
+            echo -e "\e[33mNot deploying branch {$branch} because dir {$src} does not exist.\e[0m"
+        elif [ ! -d "$dst" ]; then
+            echo -e "\e[33mNot deploying branch {$branch} because dir {$dst} does not exist.\e[0m"
+        else
+            echo -e "\e[32mDeploying branch {$branch} dir {$src} to dir {$dst}.\e[0m"
+
+            if [ "$clean" == true ]; then
+                echo -e "\e[32m${IND}Cleaning dir {$dst}.\e[0m"
+                rm -rf "$dst"/*
+            fi
+
+            while IFS=$'\0' read -r src_path_rel_work_tree; do
+                src_path_rel_src=$( realpath --relative-to="$src" "$src_path_rel_work_tree" )
+                dst_path="$dst/$src_path_rel_src"
+
+                if [ ! -f "$dst_path" ]; then
+                    echo -e "\e[32m${IND}Creating file {$dst_path}.\e[0m"
+                    mkdir -p "$dst/$( dirname "$src_path_rel_src" )"
+                    cp "$src_path_rel_work_tree" "$dst_path"
+                else
+                    echo -e "\e[32m${IND}Overwriting file {$dst_path}.\e[0m"
+                    cp "$src_path_rel_work_tree" "$dst_path"
+                fi
+            done < <( git ls-tree --name-only -r $this_hash $src )
+
+            is_deployed=true
+        fi
+    fi
+done < <( git config --get-all deploy.branch )
+
+if [ "$is_deployed" == false ]; then
+    echo -e "\e[33mDid not deploy branch $this_branch.\e[0m"
 fi
 
-echo -e '\e[32mHook post-merge finished.\e[0m'
+echo -e '\e[32mPost-merge hook finished.\e[0m'
