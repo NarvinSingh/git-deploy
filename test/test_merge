@@ -1,0 +1,11 @@
+#!/bin/bash
+
+dir="$( dirname ${BASH_SOURCE[0]} )"
+
+git checkout -b feat
+echo 'File that will be merged.' >> "$dir"/app/merge.txt
+git add "$dir"/app/merge.txt
+git commit -m 'Added a file.'
+git checkout -b dev
+git merge feat
+git branch -d feat
