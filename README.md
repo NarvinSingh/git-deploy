@@ -1,33 +1,31 @@
 # Git Deploy
 
-Deploy a branch to a local or mapped directory after commits and merges on the branch.
+Deploy a source directory in the working tree to a local or mapped destination directory after commits and merges on a target branch.
+
+The source and destination directories are treated as relative roots when deploying files, so `myrepo/subdir/source/*` is deployed to `destination/*` and not `destination/subdir/source/*`.
+
+The destination directory can be cleaned before deployment. Otherwise, files and directories in the destination that are not in the source will be remain after deployment.
 
 ## Setup
 
-Copy post-commit and post-merge to the repository's .git/hooks directory.
+Copy the post-commit and post-merge hooks in app to your repository's .git/hooks directory.
 
-Specify which branches should be deployed to which directories by creating mappings in a custom git config section. 
+Use a custom git config section to specify the target branch, source directory, destination directory and whether or not extra files and directories in the destination should be removed.
 
-To deploy commits and merges to a branch to a local or mapped directory, add a local config item:                                                                
+Add a local config item to deploy a source directory to a destination directory and leave extra items in the destination after commits and merges on a target branch:
 
-```
-git config deploy.branch "branch_name /path/to/deploy"           
-```
-
-To deploy comits and merges to additional branches, add more mappings to the local config:       
-
-```
-git config --add "branch2 /path/to/deploy2"                      
+```shell
+git config deploy.branch "target_branch path/in/repo/to/source /local/path/to/destination"
 ```
 
-To deploy comits and merges to the same branch to multiple directories, add more mappings to the local config specifying the same branch again:                              
+Append a local config item to deploy the same source directory to another destination directory and remove extra items in the destination after commits and merges on a target branch:
 
-```
-git config --add "branch2 /second/path/to/deploy2"               
+```shell
+git config deploy.branch "target_branch path/in/repo/to/source /local/path/to/destination2 true"
 ```
 
-To clean the deployment directory before deploying a commit or merge, add a local config item (note that this option applies to all deployment mappings and will not clean subdirectories that are not part of the commit):                      
+Append a local config item to deploy another source directory to another destination directory (with spaces in their names) and remove extra items in the destination after commits and merges on a target branch:
 
-```
-git config deploy.clean true                                             
+```shell
+git config --add deploy.branch "target_branch 'path/in/repo/to/another source' '/local/path/to/another destination' true"
 ```
