@@ -8,7 +8,7 @@ The source directory can be deployed in default mode, in which case all files an
 
 The source directory can be deployed in clean mode, in which case all files and directories in the destination are deleted before the source items are copied to the destination. After deployment, the destination will be identical to the source.
 
-The source directory can be deployed in diff mode, in which case only files that have changed since the previous commit, or don't exist in the destination, or are a different size from their counterparts in the destination will be deployed. After deployment, items in the destination that are not in the source will remain. Items in the destination that have been changed, but are still the same size, and whose corresponding source items have not changed since the last commit will not be updated. This mode uses the least amount of bandwidth, but can result in the source and destination being out of sync if items in the destination are not exclusively modified by a single deployment.
+The source directory can be deployed in diff mode, in which case only files that have changed since the previous commit, or don't exist in the destination will be deployed. After deployment, items that already existed in the destination, but are not in the source, will remain. Items in the destination that have been changed, and whose corresponding source items have not changed since the last commit will be out of sync. This mode uses the least amount of bandwidth.
 
 ## Setup
 
