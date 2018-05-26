@@ -29,11 +29,15 @@ git config --add deploy.branch "dev ./test/app './test/deploy dirty/' false"
 # Deploy single directory after cleaning destination
 git config --add deploy.branch "dev ./test/app ./test/deploy_clean true"
 
+# Deploy in diff mode
+git config --add deploy.branch "dev ./test/app ./test/deploy_diff diff"
+
 # Initialize directories and files
 dir="$( dirname ${BASH_SOURCE[0]} )"
 rm -rf "$dir"/app
 rm -rf "$dir"/'deploy dirty'
 rm -rf "$dir"/deploy_clean
+rm -rf "$dir"/deploy_diff
 mkdir "$dir"/app
 mkdir "$dir"/app/'dir with spaces'
 mkdir "$dir"/app/js
@@ -62,3 +66,4 @@ echo 'This is a dirty file that will be overwritten too.' >> "$dir"/deploy_clean
 echo '/* This is also a file that will be overwritten. */' >> "$dir"/deploy_clean/js/main.txt
 echo '/* This is also a dirty file that will be deleted. */' >> "$dir"/deploy_clean/js/'dirty main.txt'
 echo 'This is a file in a dirty directory that will be deleted.' >> "$dir"/deploy_clean/'dirty directory'/'file 1.txt'
+mkdir "$dir"/deploy_dirty

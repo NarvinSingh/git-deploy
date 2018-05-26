@@ -1,2 +1,3 @@
 test/deploy\ dirty/
 test/deploy_clean/
+test/deploy_diff/
