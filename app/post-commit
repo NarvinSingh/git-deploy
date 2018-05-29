@@ -20,14 +20,14 @@ while IFS=$'\0' read -r deploy_line; do
     branch=
     src=
     dst=
-    clean=
+    mode=
 
     while IFS=$'\0' read -r deploy_val; do
         case "$i" in
             0) branch="$deploy_val";;
             1) src="$( sed -E 's/([^\.])\/$/\1/' <<< $deploy_val )";;
             2) dst="$( sed -E 's/([^\.])\/$/\1/' <<< $deploy_val )";;
-            3) clean="$deploy_val";;
+            3) mode="$deploy_val";;
         esac
 
         ((i++))
@@ -38,13 +38,42 @@ while IFS=$'\0' read -r deploy_line; do
             echo -e "\e[33mNot deploying branch {$branch} because dir {$src} does not exist.\e[0m"
         elif [ ! -d "$dst" ]; then
             echo -e "\e[33mNot deploying branch {$branch} because dir {$dst} does not exist.\e[0m"
+        elif [ "$mode" != '' ] &&       # default
+            [ "$mode" != 'false' ] &&   # default   (for v2.0 backwards compatibility)
+            [ "$mode" != 'clean' ] &&   # clean
+            [ "$mode" != 'true' ] &&    # clean     (for v2.0 backwards compatibility)
+            [ "$mode" != 'diff' ]; then # diff
+            echo -e "\e[33mNot deploying branch {$branch} because mode {$mode} is invalid.\e[0m"
         else
-            echo -e "\e[32mDeploying branch {$branch} dir {$src} to dir {$dst}.\e[0m"
+            # Normalize mode
+            if [ "$mode" = '' ] || [ "$mode" = 'false' ]; then
+                $mode='default'
+            elif [ "$mode" = 'true' ]; then
+                $mode='clean'
+            elif [ $( git rev-list --count "$this_hash" ) -eq 1 ]; then
+                echo -e "\e[32mOverriding diff mode to default because this is the first commit.\e[0m"
+                $mode='default'
+            fi
 
-            if [ "$clean" == true ]; then
+            echo -e "\e[32mDeploying branch {$branch} dir {$src} to dir {$dst} in {$mode} mode.\e[0m"
+
+            if [ "$mode" = 'clean' ]; then
                 echo -e "\e[32m${IND}Cleaning dir {$dst}.\e[0m"
 
                 rm -rf "$dst"/*
+            elif [ "$mode" = 'diff' ]; then
+                declare -A diffs
+
+                while IFS=$'\0' read -r file; do
+                    echo "diff deploy: $file"
+                    $diffs["$file"]=true
+                done < <( git diff --name-only "$this_hash"~1 "$this_hash" )
+
+                echo 'Dumping diffs.'
+                for key in "${!diffs[@]}"; do
+                    echo "$key=${diffs[$key]}"
+                done
+
             fi
 
             while IFS=$'\0' read -r src_path_rel_work_tree; do
@@ -56,17 +85,21 @@ while IFS=$'\0' read -r deploy_line; do
                     mkdir -p "$dst/$( dirname "$src_path_rel_src" )"
                     cp "$src_path_rel_work_tree" "$dst_path"
                 else
-                    echo -e "\e[32m${IND}Overwriting file {$dst_path}.\e[0m"
-                    cp "$src_path_rel_work_tree" "$dst_path"
+                    if [ "$mode" = 'diff' ] && ! [ ${diffs["$src_path_rel_work_tree"]+true} ]; then
+                        echo -e "\e[32m${IND}Skipping file {$src_path_rel_work_tree} because it has not changed since last commit.\e[0m"
+                    else
+                        echo -e "\e[32m${IND}Overwriting file {$dst_path}.\e[0m"
+                        cp "$src_path_rel_work_tree" "$dst_path"
+                    fi
                 fi
-            done < <( git ls-tree --name-only -r $this_hash $src )
+            done < <( git ls-tree --name-only -r "$this_hash" "$src" )
 
             is_deployed=true
         fi
     fi
 done < <( git config --get-all deploy.branch )
 
-if [ "$is_deployed" == false ]; then
+if [ "$is_deployed" = 'false' ]; then
     echo -e "\e[33mDid not deploy branch $this_branch.\e[0m"
 fi
 
