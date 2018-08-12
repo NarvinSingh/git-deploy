@@ -36,7 +36,7 @@ while IFS=$'\0' read -r deploy_line; do
     ((i++))
   done < <( echo "$deploy_line" | xargs -n1 )
 
-  echo "$DEBUG[$this_branch|$branch]$CLEAR"
+  echo -e "$DEBUG[$this_branch|$branch]$CLEAR"
   if [ "$this_branch" = "$branch" ]; then
     if [ ! -d "$src" ]; then
       echo -en $RED
