@@ -10,13 +10,13 @@ if [ "$this_branch" = 'test' ]; then
   dir="$( dirname ${BASH_SOURCE[0]} )"
 
   "$dir"/init_test
+  git commit -a -m 'Testing'
   git checkout -b test_merge
   echo 'File that will be merged.' >> "$dir"/app/merge.txt
-  git add "$dir"/app/merge.txt
-  git commit -m 'Added a file.'
+  git commit -a -m 'Added a file.'
   git checkout test
   git merge test_merge
-  git branch -d test_merge
+  git branch -D test_merge
 else
   echo -en $RED
   echo -n 'test_merge should be run with branch 'test' checked out'
