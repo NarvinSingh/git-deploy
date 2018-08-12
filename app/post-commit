@@ -3,6 +3,7 @@ declare -r CLEAR='\033[0m'
 declare -r RED='\033[31m'
 declare -r GREEN='\033[32m'
 declare -r YELLOW='\033[33m'
+declare -r DEBUG='\033[34m'
 declare -r IND='  '
 
 echo -en $GREEN
@@ -35,6 +36,7 @@ while IFS=$'\0' read -r deploy_line; do
     ((i++))
   done < <( echo "$deploy_line" | xargs -n1 )
 
+  echo "$DEBUG[$this_branch|$branch]$CLEAR"
   if [ "$this_branch" = "$branch" ]; then
     if [ ! -d "$src" ]; then
       echo -en $RED
