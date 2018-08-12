@@ -9,6 +9,7 @@ this_branch="$( git branch | grep -m 1 '^\*\s' | cut -c 3- )"
 if [ "$this_branch" = 'test' ]; then
   dir="$( dirname ${BASH_SOURCE[0]} )"
 
+  "$dir"/init_test
   git checkout -b test_merge
   echo 'File that will be merged.' >> "$dir"/app/merge.txt
   git add "$dir"/app/merge.txt

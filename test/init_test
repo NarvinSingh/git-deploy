@@ -1,69 +1,80 @@
 #!/bin/bash
+declare -r CLEAR='\033[0m'
+declare -r RED='\033[31m'
+declare -r GREEN='\033[32m'
+declare -r YELLOW='\033[33m'
 
-git config --unset-all deploy.branch
+this_branch="$( git branch | grep -m 1 '^\*\s' | cut -c 3- )"
 
-# No-op because branch is empty
-git config deploy.branch ""
+if [ "$this_branch" = 'test' ]; then
+  git config --unset-all deploy.branch
 
-# No-op because branch is empty
-git config --add deploy.branch " ./test/app ./test/no_op"
+  # No-op because branch is empty
+  git config deploy.branch ""
 
-# No-op because src is empty
-git config --add deploy.branch "test '' ./test/no_op"
+  # No-op because branch is empty
+  git config --add deploy.branch " ./test/app ./test/no_op"
 
-# No-op because src and dst are empty
-git config --add deploy.branch "test '' ''"
+  # No-op because src is empty
+  git config --add deploy.branch "test '' ./test/no_op"
 
-# No-op because src doesn't exist
-git config --add deploy.branch "test './test/app_non_existent' ./test/no_op"
+  # No-op because src and dst are empty
+  git config --add deploy.branch "test '' ''"
 
-# No-op because dst doesn't exist
-git config --add deploy.branch "test './test/app' './test/deploy_non_existent'"
+  # No-op because src doesn't exist
+  git config --add deploy.branch "test './test/app_non_existent' ./test/no_op"
 
-# Deploy single directory without cleaning destination
-git config --add deploy.branch "test ./test/app/ './test/deploy dirty'"
+  # No-op because dst doesn't exist
+  git config --add deploy.branch "test './test/app' './test/deploy_non_existent'"
 
-# Deploy single directory without cleaning destination
-git config --add deploy.branch "test ./test/app './test/deploy dirty/' false"
+  # Deploy single directory without cleaning destination
+  git config --add deploy.branch "test ./test/app/ './test/deploy dirty'"
 
-# Deploy single directory after cleaning destination
-git config --add deploy.branch "test ./test/app ./test/deploy_clean true"
+  # Deploy single directory without cleaning destination
+  git config --add deploy.branch "test ./test/app './test/deploy dirty/' false"
 
-# Deploy in diff mode
-git config --add deploy.branch "test ./test/app ./test/deploy_diff diff"
+  # Deploy single directory after cleaning destination
+  git config --add deploy.branch "test ./test/app ./test/deploy_clean true"
 
-# Initialize directories and files
-dir="$( dirname ${BASH_SOURCE[0]} )"
-rm -rf "$dir"/app
-rm -rf "$dir"/'deploy dirty'
-rm -rf "$dir"/deploy_clean
-rm -rf "$dir"/deploy_diff
-mkdir "$dir"/app
-mkdir "$dir"/app/'dir with spaces'
-mkdir "$dir"/app/js
-echo 'This is a file.' >> "$dir"/app/'file 1.txt'
-echo 'This is a file too.' >> "$dir"/app/'dir with spaces'/'file 2.txt'
-echo '/* This is also a file. */' >> "$dir"/app/js/main.txt
-mkdir "$dir"/'deploy dirty'
-mkdir "$dir"/'deploy dirty'/'dir with spaces'
-mkdir "$dir"/'deploy dirty'/js
-mkdir "$dir"/'deploy dirty'/'dirty directory'
-echo 'This is a file that will be overwritten.' >> "$dir"/'deploy dirty'/'file 1.txt'
-echo 'This is a dirty file that will not be overwritten.' >> "$dir"/'deploy dirty'/'dirty file 1.txt'
-echo 'This is a file that will be overwritten too.' >> "$dir"/'deploy dirty'/'dir with spaces'/'file 2.txt'
-echo 'This is a dirty file that will not be overwritten too.' >> "$dir"/'deploy dirty'/'dir with spaces'/'dirty file 2.txt'
-echo '/* This is also a file that will be overwritten. */' >> "$dir"/'deploy dirty'/js/main.txt
-echo '/* This is also a dirty file that will not be overwritten. */' >> "$dir"/'deploy dirty'/js/'dirty main.txt'
-echo 'This is a file in a dirty directory that will not be overwritten.' >> "$dir"/'deploy dirty'/'dirty directory'/'file 1.txt'
-mkdir "$dir"/deploy_clean
-mkdir "$dir"/deploy_clean/'dir with spaces'
-mkdir "$dir"/deploy_clean/js
-mkdir "$dir"/deploy_clean/'dirty directory'
-echo 'This is a file that will be overwritten.' >> "$dir"/deploy_clean/'file 1.txt'
-echo 'This is a dirty file that will be deleted.' >> "$dir"/deploy_clean/'dirty file 1.txt'
-echo 'This is a file that will be overwritten too.' >> "$dir"/deploy_clean/'dir with spaces'/'file 2.txt'
-echo 'This is a dirty file that will be overwritten too.' >> "$dir"/deploy_clean/'dir with spaces'/'dirty file 2.txt'
-echo '/* This is also a file that will be overwritten. */' >> "$dir"/deploy_clean/js/main.txt
-echo '/* This is also a dirty file that will be deleted. */' >> "$dir"/deploy_clean/js/'dirty main.txt'
-echo 'This is a file in a dirty directory that will be deleted.' >> "$dir"/deploy_clean/'dirty directory'/'file 1.txt'
-mkdir "$dir"/deploy_dirty
+  # Deploy in diff mode
+  git config --add deploy.branch "test ./test/app ./test/deploy_diff diff"
+
+  # Initialize directories and files
+  dir="$( dirname ${BASH_SOURCE[0]} )"
+  rm -rf "$dir"/app
+  rm -rf "$dir"/'deploy dirty'
+  rm -rf "$dir"/deploy_clean
+  rm -rf "$dir"/deploy_diff
+  mkdir "$dir"/app
+  mkdir "$dir"/app/'dir with spaces'
+  mkdir "$dir"/app/js
+  echo 'This is a file.' >> "$dir"/app/'file 1.txt'
+  echo 'This is a file too.' >> "$dir"/app/'dir with spaces'/'file 2.txt'
+  echo '/* This is also a file. */' >> "$dir"/app/js/main.txt
+  mkdir "$dir"/'deploy dirty'
+  mkdir "$dir"/'deploy dirty'/'dir with spaces'
+  mkdir "$dir"/'deploy dirty'/js
+  mkdir "$dir"/'deploy dirty'/'dirty directory'
+  echo 'This is a file that will be overwritten.' >> "$dir"/'deploy dirty'/'file 1.txt'
+  echo 'This is a dirty file that will not be overwritten.' >> "$dir"/'deploy dirty'/'dirty file 1.txt'
+  echo 'This is a file that will be overwritten too.' >> "$dir"/'deploy dirty'/'dir with spaces'/'file 2.txt'
+  echo 'This is a dirty file that will not be overwritten too.' >> "$dir"/'deploy dirty'/'dir with spaces'/'dirty file 2.txt'
+  echo '/* This is also a file that will be overwritten. */' >> "$dir"/'deploy dirty'/js/main.txt
+  echo '/* This is also a dirty file that will not be overwritten. */' >> "$dir"/'deploy dirty'/js/'dirty main.txt'
+  echo 'This is a file in a dirty directory that will not be overwritten.' >> "$dir"/'deploy dirty'/'dirty directory'/'file 1.txt'
+  mkdir "$dir"/deploy_clean
+  mkdir "$dir"/deploy_clean/'dir with spaces'
+  mkdir "$dir"/deploy_clean/js
+  mkdir "$dir"/deploy_clean/'dirty directory'
+  echo 'This is a file that will be overwritten.' >> "$dir"/deploy_clean/'file 1.txt'
+  echo 'This is a dirty file that will be deleted.' >> "$dir"/deploy_clean/'dirty file 1.txt'
+  echo 'This is a file that will be overwritten too.' >> "$dir"/deploy_clean/'dir with spaces'/'file 2.txt'
+  echo 'This is a dirty file that will be overwritten too.' >> "$dir"/deploy_clean/'dir with spaces'/'dirty file 2.txt'
+  echo '/* This is also a file that will be overwritten. */' >> "$dir"/deploy_clean/js/main.txt
+  echo '/* This is also a dirty file that will be deleted. */' >> "$dir"/deploy_clean/js/'dirty main.txt'
+  echo 'This is a file in a dirty directory that will be deleted.' >> "$dir"/deploy_clean/'dirty directory'/'file 1.txt'
+else
+  echo -en $RED
+  echo -n 'test_merge should be run with branch 'test' checked out'
+  echo -e $CLEAR
+fi
