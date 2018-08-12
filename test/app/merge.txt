@@ -1,1 +1,2 @@
 File that will be merged.
+File that will be merged.
