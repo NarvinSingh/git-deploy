@@ -58,15 +58,15 @@ while IFS=$'\0' read -r deploy_line; do
     else
       # Normalize mode
       if [ "$mode" = '' ] || [ "$mode" = 'false' ]; then
-        $mode='default'
+        mode='default'
       elif [ "$mode" = 'true' ]; then
-        $mode='clean'
+        mode='clean'
       elif [ $( git rev-list --count "$this_hash" ) -eq 1 ]; then
         echo -en $YELLOW
         echo -n 'Overriding diff mode to default because this is the first '
         echo -n 'commit.'
         echo -e $CLEAR
-        $mode='default'
+        mode='default'
       fi
 
       echo -en $GREEN
@@ -82,7 +82,7 @@ while IFS=$'\0' read -r deploy_line; do
 
         while IFS=$'\0' read -r file; do
           echo "diff deploy: $file"
-          $diffs["$file"]=true
+          diffs["$file"]=true
         done < <( git diff --name-only "$this_hash"~1 "$this_hash" )
 
         echo 'Dumping diffs.'
