@@ -1,7 +1,8 @@
 #!/bin/bash
 declare -r CLEAR='\033[0m'
+declare -r RED='\033[31m'
 declare -r GREEN='\033[32m'
-declare -r RED='\033[33m'
+declare -r YELLOW='\033[33m'
 declare -r IND='  '
 
 echo -en $GREEN
@@ -12,7 +13,7 @@ cat <<'EOH'
 EOH
 echo -en $CLEAR
 
-this_branch=$( git branch | grep '^\*\s[^\s]' | cut -c 3- )
+this_branch=$( git branch | grep -m 1 '^\*\s' | cut -c 3- )
 this_hash=$( git rev-parse $this_branch )
 is_deployed=false
 
@@ -45,11 +46,11 @@ while IFS=$'\0' read -r deploy_line; do
       echo -n "Not deploying branch {$branch} because dir {$dst} does not "
       echo -n 'exist.'
       echo -e $CLEAR
-    elif [ "$mode" != '' ]        # default
-      && [ "$mode" != 'false' ]   # default   (for v2.0 backwards compatibility)
-      && [ "$mode" != 'clean' ]   # clean
-      && [ "$mode" != 'true' ]    # clean     (for v2.0 backwards compatibility)
-      && [ "$mode" != 'diff' ]; then # diff
+    elif [ "$mode" != '' ] &&     # default
+      [ "$mode" != 'false' ] &&   # default   (for v2.0 backwards compatibility)
+      [ "$mode" != 'clean' ] &&   # clean
+      [ "$mode" != 'true' ] &&    # clean     (for v2.0 backwards compatibility)
+      [ "$mode" != 'diff' ]; then # diff
         echo -en $RED
         echo -n "Not deploying branch {$branch} because mode {$mode} is "
         echo -n 'invalid.'
@@ -61,7 +62,7 @@ while IFS=$'\0' read -r deploy_line; do
       elif [ "$mode" = 'true' ]; then
         $mode='clean'
       elif [ $( git rev-list --count "$this_hash" ) -eq 1 ]; then
-        echo -en $GREEN
+        echo -en $YELLOW
         echo -n 'Overriding diff mode to default because this is the first '
         echo -n 'commit.'
         echo -e $CLEAR
@@ -92,7 +93,7 @@ while IFS=$'\0' read -r deploy_line; do
 
       while IFS=$'\0' read -r src_path_rel_work_tree; do
         src_path_rel_src=\
-          $(realpath --relative-to="$src" "$src_path_rel_work_tree")
+          $( realpath --relative-to="$src" "$src_path_rel_work_tree" )
         dst_path="$dst/$src_path_rel_src"
 
         if [ ! -f "$dst_path" ]; then
@@ -100,8 +101,8 @@ while IFS=$'\0' read -r deploy_line; do
           mkdir -p "$dst/$( dirname "$src_path_rel_src" )"
           cp "$src_path_rel_work_tree" "$dst_path"
         else
-          if [ "$mode" = 'diff' ]
-            && ! [ ${diffs["$src_path_rel_work_tree"]+true} ]; then
+          if [ "$mode" = 'diff' ] &&
+            ! [ ${diffs["$src_path_rel_work_tree"]+true} ]; then
             echo -en $GREEN
             echo -n "${IND}Skipping file {$src_path_rel_work_tree} because it "
             echo -n 'has not changed since last commit.'
@@ -119,7 +120,7 @@ while IFS=$'\0' read -r deploy_line; do
 done < <( git config --get-all deploy.branch )
 
 if [ "$is_deployed" = 'false' ]; then
-  echo -e "${RED}Did not deploy branch $this_branch.$CLEAR"
+  echo -e "${YELLOW}Did not deploy branch $this_branch.$CLEAR"
 fi
 
 echo -e "${GREEN}Post-Commit hook finished.$CLEAR"

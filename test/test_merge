@@ -1,11 +1,23 @@
 #!/bin/bash
+declare -r CLEAR='\033[0m'
+declare -r RED='\033[31m'
+declare -r GREEN='\033[32m'
+declare -r YELLOW='\033[33m'
 
-dir="$( dirname ${BASH_SOURCE[0]} )"
+this_branch="$( git branch | grep -m 1 '^\*\s' | cut -c 3- )"
 
-git checkout -b feat
-echo 'File that will be merged.' >> "$dir"/app/merge.txt
-git add "$dir"/app/merge.txt
-git commit -m 'Added a file.'
-git checkout dev
-git merge feat
-git branch -d feat
+if [ "$this_branch" = 'test' ]; then
+  dir="$( dirname ${BASH_SOURCE[0]} )"
+
+  git checkout -b test_merge
+  echo 'File that will be merged.' >> "$dir"/app/merge.txt
+  git add "$dir"/app/merge.txt
+  git commit -m 'Added a file.'
+  git checkout test
+  git merge test_merge
+  git branch -d test_merge
+else
+  echo -en $RED
+  echo -n 'test_merge should be run with branch 'test' checked out'
+  echo -e $CLEAR
+fi

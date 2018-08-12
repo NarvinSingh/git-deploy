@@ -9,28 +9,28 @@ git config deploy.branch ""
 git config --add deploy.branch " ./test/app ./test/no_op"
 
 # No-op because src is empty
-git config --add deploy.branch "dev '' ./test/no_op"
+git config --add deploy.branch "test '' ./test/no_op"
 
 # No-op because src and dst are empty
-git config --add deploy.branch "dev '' ''"
+git config --add deploy.branch "test '' ''"
 
 # No-op because src doesn't exist
-git config --add deploy.branch "dev './test/app_non_existent' ./test/no_op"
+git config --add deploy.branch "test './test/app_non_existent' ./test/no_op"
 
 # No-op because dst doesn't exist
-git config --add deploy.branch "dev './test/app' './test/deploy_non_existent'"
+git config --add deploy.branch "test './test/app' './test/deploy_non_existent'"
 
 # Deploy single directory without cleaning destination
-git config --add deploy.branch "dev ./test/app/ './test/deploy dirty'"
+git config --add deploy.branch "test ./test/app/ './test/deploy dirty'"
 
 # Deploy single directory without cleaning destination
-git config --add deploy.branch "dev ./test/app './test/deploy dirty/' false"
+git config --add deploy.branch "test ./test/app './test/deploy dirty/' false"
 
 # Deploy single directory after cleaning destination
-git config --add deploy.branch "dev ./test/app ./test/deploy_clean true"
+git config --add deploy.branch "test ./test/app ./test/deploy_clean true"
 
 # Deploy in diff mode
-git config --add deploy.branch "dev ./test/app ./test/deploy_diff diff"
+git config --add deploy.branch "test ./test/app ./test/deploy_diff diff"
 
 # Initialize directories and files
 dir="$( dirname ${BASH_SOURCE[0]} )"
