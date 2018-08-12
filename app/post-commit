@@ -94,7 +94,8 @@ while IFS=$'\0' read -r deploy_line; do
       fi
 
       while IFS=$'\0' read -r src_path_rel_work_tree; do
-        src_path_rel_src=$( realpath --relative-to="$src" "$src_path_rel_work_tree" )
+        src_path_rel_src=$( \
+          realpath --relative-to="$src" "$src_path_rel_work_tree" )
         dst_path="$dst/$src_path_rel_src"
 
         if [ ! -f "$dst_path" ]; then
