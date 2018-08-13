@@ -78,7 +78,7 @@ while IFS=$'\0' read -r deploy_line; do
         echo -e "${GREEN}${IND}Cleaning dir {$dst}.$CLEAR"
         rm -rf "$dst"/*
       elif [ "$mode" = 'diff' ]; then
-        declare -A diffs
+        declare -a diffs
 
         while IFS=$'\0' read -r file; do
           echo "diff deploy: $file"
