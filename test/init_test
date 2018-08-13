@@ -73,6 +73,8 @@ if [ "$this_branch" = 'test' ]; then
   echo '/* This is also a file that will be overwritten. */' >> "$dir"/deploy_clean/js/main.txt
   echo '/* This is also a dirty file that will be deleted. */' >> "$dir"/deploy_clean/js/'dirty main.txt'
   echo 'This is a file in a dirty directory that will be deleted.' >> "$dir"/deploy_clean/'dirty directory'/'file 1.txt'
+  mkdir "$dir"/deploy_diff
+  cp "$dir"/app/'file 1.txt' "$dir"/deploy_diff
 else
   echo -en $RED
   echo -n 'test_merge should be run with branch 'test' checked out'
