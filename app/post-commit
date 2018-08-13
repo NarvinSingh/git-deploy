@@ -79,18 +79,6 @@ while IFS=$'\0' read -r deploy_line; do
         rm -rf "$dst"/*
       elif [ "$mode" = 'diff' ]; then
         diffs=$( git diff --name-only "$this_hash"~1 "$this_hash" )
-        echo "diffs: $diffs"
-#        declare -a diffs
-#
-#        while IFS=$'\0' read -r file; do
-#          echo "diff deploy: $file"
-#          diffs["$file"]=true
-#        done < <( git diff --name-only "$this_hash"~1 "$this_hash" )
-#
-#        echo 'Dumping diffs.'
-#        for key in "${!diffs[@]}"; do
-#          echo "$key=${diffs[$key]}"
-#        done
       fi
 
       while IFS=$'\0' read -r src_path_rel_work_tree; do
@@ -115,29 +103,6 @@ while IFS=$'\0' read -r deploy_line; do
           fi
         fi
       done < <( git ls-tree --name-only -r "$this_hash" "$src" )
-
-#      while IFS=$'\0' read -r src_path_rel_work_tree; do
-#        src_path_rel_src=$( \
-#          realpath --relative-to="$src" "$src_path_rel_work_tree" )
-#        dst_path="$dst/$src_path_rel_src"
-#
-#        if [ ! -f "$dst_path" ]; then
-#          echo -e "${GREEN}${IND}Creating file {$dst_path}.$CLEAR"
-#          mkdir -p "$dst/$( dirname "$src_path_rel_src" )"
-#          cp "$src_path_rel_work_tree" "$dst_path"
-#        else
-#          if [ "$mode" = 'diff' ] &&
-#            ! [ ${diffs["$src_path_rel_work_tree"]+true} ]; then
-#            echo -en $GREEN
-#            echo -n "${IND}Skipping file {$src_path_rel_work_tree} because it "
-#            echo -n 'has not changed since last commit.'
-#            echo -e $CLEAR
-#          else
-#            echo -e "${GREEN}${IND}Overwriting file {$dst_path}.$CLEAR"
-#            cp "$src_path_rel_work_tree" "$dst_path"
-#          fi
-#        fi
-#      done < <( git ls-tree --name-only -r "$this_hash" "$src" )
 
       is_deployed=true
     fi
