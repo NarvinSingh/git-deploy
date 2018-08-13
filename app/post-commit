@@ -104,7 +104,7 @@ while IFS=$'\0' read -r deploy_line; do
           cp "$src_path_rel_work_tree" "$dst_path"
         else
           if [ "$mode" = 'diff' ] &&
-            [ $( echo $diffs | fgrep -m 1 "$src_path_rel_src" ) = '' ]; then
+            [ "$( echo $diffs | fgrep -m 1 "$src_path_rel_src" )" = '' ]; then
             echo -en $GREEN
             echo -n "${IND}Skipping file {$src_path_rel_work_tree} because it "
             echo -n 'has not changed since last commit.'
