@@ -1,0 +1,145 @@
+#!/bin/sh
+CLEAR='\033[0m'
+BLACK='\033[30m'
+RED='\033[31m'
+GREEN='\033[32m'
+YELLOW='\033[33m'
+BLUE='\033[34m'
+MAGENTA='\033[35m'
+CYAN='\033[36m'
+LGRAY='\033[37m'
+DGRAY='\033[90m'
+LRED='\033[91m'
+LGREEN='\033[92m'
+LYELLOW='\033[93m'
+LBLUE='\033[94m'
+LMAGENTA='\033[95m'
+LCYAN='\033[96m'
+WHITE='\033[97m'
+
+# printf "${BLACK}BLACK\n"
+# printf "${RED}RED\n"
+# printf "${GREEN}GREEN\n"
+# printf "${YELLOW}YELLOW\n"
+# printf "${BLUE}BLUE\n"
+# printf "${MAGENTA}MAGENTA\n"
+# printf "${CYAN}CYAN\n"
+# printf "${LGRAY}LGRAY\n"
+# printf "${DGRAY}DGRAY\n"
+# printf "${LRED}LRED\n"
+# printf "${LGREEN}LGREEN\n"
+# printf "${LYELLOW}LYELLOW\n"
+# printf "${LBLUE}LBLUE\n"
+# printf "${LMAGENTA}LMAGENTA\n"
+# printf "${LCYAN}LCYAN\n"
+# printf "${WHITE}WHITE\n"
+# printf "${CLEAR}CLEAR\n"
+# exit 0
+
+this_branch=$(git branch | grep -m 1 '^\*\s' | cut -c 3-)
+
+if [ "$this_branch" = test ]; then
+  git config --unset-all deploy.branch
+
+  # No-op because branch is empty
+  git config deploy.branch ''
+
+  # No-op because branch is empty
+  git config --add deploy.branch ' ./test/app ./test/no_op'
+
+  # No-op because src is empty
+  git config --add deploy.branch "test '' ./test/no_op"
+
+  # No-op because src and dst are empty
+  git config --add deploy.branch "test '' ''"
+
+  # No-op because src doesn't exist
+  git config --add deploy.branch 'test ./test/app_non_existent ./test/no_op'
+
+  # No-op because dst doesn't exist
+  git config --add deploy.branch 'test ./test/app ./test/deploy_non_existent'
+
+  # Deploy single directory without cleaning destination
+  git config --add deploy.branch "test ./test/app/ './test/deploy dirty'"
+
+  # Deploy single directory without cleaning destination
+  git config --add deploy.branch "test ./test/app './test/deploy dirty/' false"
+
+  # Deploy single directory after cleaning destination
+  git config --add deploy.branch 'test ./test/app ./test/deploy_clean true'
+
+  # Deploy in diff mode
+  git config --add deploy.branch 'test ./test/app ./test/deploy_diff diff'
+
+  # Initialize directories and files
+  dir=$(dirname $0)
+
+  # Start with a clean slate by deleting the deployment source and targets
+  rm -rf "$dir/app"
+  rm -rf "$dir/deploy dirty"
+  rm -rf "$dir/deploy_clean"
+  rm -rf "$dir/deploy_diff"
+
+  # Create the deployment source
+  mkdir "$dir/app"
+  mkdir "$dir/app/dir with spaces"
+  mkdir "$dir/app/js"
+  printf 'File in root to be deployed' > "$dir/app/file with spaces.txt"
+  printf 'File in subdir to be deployed' > "$dir/app/dir with spaces/file.txt"
+  printf '// File in subdir to be deployed' > "$dir/app/js/main.js"
+
+  # Create the deployment dirty target
+  # Files that are also in the source will be overwritten in the target
+  # Files and directories not in the source won't be modified in the target
+  mkdir "$dir/deploy dirty"
+  mkdir "$dir/deploy dirty/dir with spaces"
+  mkdir "$dir/deploy dirty/js"
+  mkdir "$dir/deploy dirty/dir_not_in_source"
+  printf 'File in root to be overwritten' > \
+    "$dir/deploy dirty/file with spaces.txt"
+  printf 'File in root not to be overwritten' > \
+    "$dir/deploy dirty/file_not_in_src.txt"
+  printf 'File in subdir to be overwritten' > \
+    "$dir/deploy dirty/dir with spaces/file.txt"
+  printf 'File in subdir not to be overwritten' > \
+    "$dir/deploy dirty/dir with spaces/file_not_in_src.txt"
+  printf '// File in subdir to be overwritten' > "$dir/deploy dirty/js/main.txt"
+  printf '// File in subdir not to be overwritten' > \
+    "$dir/deploy dirty/js/file_not_in_src.js"
+  printf 'File in subdir not to be overwritten' > \
+    "$dir/deploy dirty/dir_not_in_src/file_not_in_src.txt"
+
+  # Create the deployment clean target
+  # Files that are also in the source will be overwritten in the target
+  # Files and directories not in the source will be deleted in the target
+  mkdir "$dir/deploy_clean"
+  mkdir "$dir/deploy_clean/dir with spaces"
+  mkdir "$dir/deploy_clean/js"
+  mkdir "$dir/deploy_clean/dir_not_in_source"
+  printf 'File in root to be overwritten' > \
+    "$dir/deploy_clean/file with spaces.txt"
+  printf 'File in root to be deleted' > "$dir/deploy_clean/file_not_in_src.txt"
+  printf 'File in subdir to be overwritten' > \
+    "$dir/deploy_clean/dir with spaces/file.txt"
+  printf 'File in subdir to be deleted' > \
+    "$dir/deploy_clean/dir with spaces/file_not_in_src.txt"
+  printf '// File in subdir to be overwritten' > "$dir/deploy_clean/js/main.txt"
+  printf '// File in subdir to be deleted' > \
+    "$dir/deploy_clean/js/file_not_in_src.js"
+  printf 'File in subdir to be deleted' > \
+    "$dir/deploy_clean/dir_not_in_src/file_not_in_src.txt"
+
+  # Create the deployment diff target
+  # Files that are also in the source and have changed or have been created in
+  # the source will be overwritten in the target
+  # Files that are also in the source but have not changed or have not been
+  # created in the source will not be modified in the target. If they have been
+  # modified in the target, they will be out of sync with their source
+  # counterparts.
+  # Files and directories not in the source won't be modified in the target
+  mkdir "$dir/deploy_diff"
+  # cp "$dir/app/file 1.txt" "$dir/deploy_diff"
+else
+  printf \
+    "${RED}$0 should be run with branch $MAGENTA[test]$RED checked out\n$CLEAR"
+fi

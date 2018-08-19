@@ -1,24 +1,36 @@
-#!/bin/bash
-declare -r CLEAR='\033[0m'
-declare -r RED='\033[31m'
-declare -r GREEN='\033[32m'
-declare -r YELLOW='\033[33m'
+#!/bin/sh
+CLEAR='\033[0m'
+BLACK='\033[30m'
+RED='\033[31m'
+GREEN='\033[32m'
+YELLOW='\033[33m'
+BLUE='\033[34m'
+MAGENTA='\033[35m'
+CYAN='\033[36m'
+LGRAY='\033[37m'
+DGRAY='\033[90m'
+LRED='\033[91m'
+LGREEN='\033[92m'
+LYELLOW='\033[93m'
+LBLUE='\033[94m'
+LMAGENTA='\033[95m'
+LCYAN='\033[96m'
+WHITE='\033[97m'
 
-this_branch="$( git branch | grep -m 1 '^\*\s' | cut -c 3- )"
+this_branch=$(git branch | grep -m 1 '^\*\s' | cut -c 3-)
 
-if [ "$this_branch" = 'test' ]; then
-  dir="$( dirname ${BASH_SOURCE[0]} )"
+if [ "$this_branch" = test ]; then
+  dir=$(dirname $0)
 
-  "$dir"/init_test
+  "$dir/init"
   git commit -a -m 'Testing'
   git checkout -b test_merge
-  echo 'File that will be merged.' >> "$dir"/app/merge.txt
+  printf 'File that will be merged.' > "$dir/app/merge.txt"
   git commit -a -m 'Added a file.'
   git checkout test
   git merge test_merge
   git branch -D test_merge
 else
-  echo -en $RED
-  echo -n 'test_merge should be run with branch 'test' checked out'
-  echo -e $CLEAR
+  printf \
+    "${RED}$0 should be run with branch $MAGENTA[test]$RED checked out\n$CLEAR"
 fi
