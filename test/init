@@ -94,7 +94,7 @@ if [ "$this_branch" = test ]; then
   mkdir "$dir/deploy dirty"
   mkdir "$dir/deploy dirty/dir with spaces"
   mkdir "$dir/deploy dirty/js"
-  mkdir "$dir/deploy dirty/dir_not_in_source"
+  mkdir "$dir/deploy dirty/dir_not_in_src"
   printf 'File in root to be overwritten' > \
     "$dir/deploy dirty/file with spaces.txt"
   printf 'File in root not to be overwritten' > \
@@ -115,7 +115,7 @@ if [ "$this_branch" = test ]; then
   mkdir "$dir/deploy_clean"
   mkdir "$dir/deploy_clean/dir with spaces"
   mkdir "$dir/deploy_clean/js"
-  mkdir "$dir/deploy_clean/dir_not_in_source"
+  mkdir "$dir/deploy_clean/dir_not_in_src"
   printf 'File in root to be overwritten' > \
     "$dir/deploy_clean/file with spaces.txt"
   printf 'File in root to be deleted' > "$dir/deploy_clean/file_not_in_src.txt"
