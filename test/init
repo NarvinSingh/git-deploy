@@ -13,6 +13,39 @@
 # The merge branch is merged.
 # The contents of the destination directories are checked.
 
+# {{{ Function to check file existence and contents
+function chkfile()
+{
+  file=$1
+  content=$2
+
+  if [ -f "$file" ]; then
+    printf "${GREEN}File Found: $file\n$CLEAR"
+
+    if [ "$content" = "$(cat "$file")" ]; then
+      printf "${GREEN}File OK: $file\n$CLEAR"
+    else
+      printf "${RED}File not OK: $file\n$CLEAR"
+    fi
+  else
+    printf "${RED}File not Found: $file\n$CLEAR"
+  fi
+}
+# }}}
+
+# {{{ Function to check file existence and contents
+function chkdir()
+{
+  dir=$1
+  files=$2
+
+  while read file; do
+    if [ -f "$dir/$files" ]; then
+    else
+    fi
+  done
+}
+# }}}
 # {{{ Foreground color constants
 CLEAR='\033[0m'
 BLACK='\033[30m'
@@ -79,10 +112,11 @@ if [ "$this_branch" = test ]; then
   git config --add deploy.branch 'test ./test/app ./test/deploy_non_existent'
 
   # Deploy single directory without cleaning destination
-  git config --add deploy.branch "test ./test/app/ './test/deploy dirty'"
+  git config --add deploy.branch "test ./test/app/ './test/deploy default'"
 
   # Deploy single directory without cleaning destination
-  git config --add deploy.branch "test ./test/app './test/deploy d2/' false"
+  git config --add deploy.branch \
+    "test ./test/app './test/deploy default 2/' false"
 
   # Deploy single directory after cleaning destination
   git config --add deploy.branch 'test ./test/app ./test/deploy_clean true'
@@ -91,68 +125,68 @@ if [ "$this_branch" = test ]; then
   git config --add deploy.branch 'test ./test/app ./test/deploy_diff diff'
   # }}}
 
-  # Initialize directories and files
   dir=$(dirname $0)
 
-  # Start with a clean slate by deleting the deployment source and destinations
+  # {{{ Delete directories
   rm -rf "$dir/app"
-  rm -rf "$dir/deploy dirty"
+  rm -rf "$dir/deploy default"
+  rm -rf "$dir/deploy default 2"
   rm -rf "$dir/deploy_clean"
   rm -rf "$dir/deploy_diff"
+  # }}}
 
-  # Create the deployment source
+  # {{{ Create the deployment source
   mkdir "$dir/app"
   mkdir "$dir/app/dir with spaces"
   mkdir "$dir/app/js"
   printf 'File in root to be deployed' > "$dir/app/file with spaces.txt"
   printf 'File in subdir to be deployed' > "$dir/app/dir with spaces/file.txt"
   printf '// File in subdir to be deployed' > "$dir/app/js/main.js"
+  # }}}
 
-  # Create the first deployment dirty destination
-  # Files that are also in the source will be overwritten in the destination
-  # Files and directories not in the source won't be modified in the destination
-  mkdir "$dir/deploy dirty"
-  mkdir "$dir/deploy dirty/dir with spaces"
-  mkdir "$dir/deploy dirty/js"
-  mkdir "$dir/deploy dirty/dir_not_in_src"
+  # {{{ Create the first deployment default mode destination
+  mkdir "$dir/deploy default"
+  mkdir "$dir/deploy default/dir with spaces"
+  mkdir "$dir/deploy default/js"
+  mkdir "$dir/deploy default/dir_not_in_src"
   printf 'File in root to be overwritten' > \
-    "$dir/deploy dirty/file with spaces.txt"
+    "$dir/deploy default/file with spaces.txt"
   printf 'File in root not to be overwritten' > \
-    "$dir/deploy dirty/file_not_in_src.txt"
+    "$dir/deploy default/file_not_in_src.txt"
   printf 'File in subdir to be overwritten' > \
-    "$dir/deploy dirty/dir with spaces/file.txt"
+    "$dir/deploy default/dir with spaces/file.txt"
   printf 'File in subdir not to be overwritten' > \
-    "$dir/deploy dirty/dir with spaces/file_not_in_src.txt"
-  printf '// File in subdir to be overwritten' > "$dir/deploy dirty/js/main.txt"
+    "$dir/deploy default/dir with spaces/file_not_in_src.txt"
+  printf '// File in subdir to be overwritten' > \
+    "$dir/deploy default/js/main.js"
   printf '// File in subdir not to be overwritten' > \
-    "$dir/deploy dirty/js/file_not_in_src.js"
+    "$dir/deploy default/js/file_not_in_src.js"
   printf 'File in subdir not to be overwritten' > \
-    "$dir/deploy dirty/dir_not_in_src/file_not_in_src.txt"
+    "$dir/deploy default/dir_not_in_src/file_not_in_src.txt"
+  # }}}
 
-  # Create the second deployment dirty destination
-  # Files that are also in the source will be overwritten in the destination
-  # Files and directories not in the source won't be modified in the destination
-  mkdir "$dir/deploy d2"
-  mkdir "$dir/deploy d2/dir with spaces"
-  mkdir "$dir/deploy d2/js"
-  mkdir "$dir/deploy d2/dir_not_in_src"
+  # {{{ Create the second deployment default mode destination
+  mkdir "$dir/deploy default 2"
+  mkdir "$dir/deploy default 2/dir with spaces"
+  mkdir "$dir/deploy default 2/js"
+  mkdir "$dir/deploy default 2/dir_not_in_src"
   printf 'File in root to be overwritten' > \
-    "$dir/deploy d2/file with spaces.txt"
+    "$dir/deploy default 2/file with spaces.txt"
   printf 'File in root not to be overwritten' > \
-    "$dir/deploy d2/file_not_in_src.txt"
+    "$dir/deploy default 2/file_not_in_src.txt"
   printf 'File in subdir to be overwritten' > \
-    "$dir/deploy d2/dir with spaces/file.txt"
+    "$dir/deploy default 2/dir with spaces/file.txt"
   printf 'File in subdir not to be overwritten' > \
-    "$dir/deploy d2/dir with spaces/file_not_in_src.txt"
-  printf '// File in subdir to be overwritten' > "$dir/deploy d2/js/main.txt"
+    "$dir/deploy default 2/dir with spaces/file_not_in_src.txt"
+  printf '// File in subdir to be overwritten' > \
+    "$dir/deploy default 2/js/main.js"
   printf '// File in subdir not to be overwritten' > \
-    "$dir/deploy d2/js/file_not_in_src.js"
+    "$dir/deploy default 2/js/file_not_in_src.js"
   printf 'File in subdir not to be overwritten' > \
-    "$dir/deploy d2/dir_not_in_src/file_not_in_src.txt"
+    "$dir/deploy default 2/dir_not_in_src/file_not_in_src.txt"
+  # }}}
 
-  # Create the deployment clean destination
-  # Files that are also in the source will be overwritten in the destination
-  # Files and directories not in the source will be deleted in the destination
+  # {{{ Create the deployment clean mode destination
   mkdir "$dir/deploy_clean"
   mkdir "$dir/deploy_clean/dir with spaces"
   mkdir "$dir/deploy_clean/js"
@@ -169,17 +203,36 @@ if [ "$this_branch" = test ]; then
     "$dir/deploy_clean/js/file_not_in_src.js"
   printf 'File in subdir to be deleted' > \
     "$dir/deploy_clean/dir_not_in_src/file_not_in_src.txt"
+  # }}}
 
-  # Create the deployment diff destination
-  # Files that are also in the source and have changed or have been created in
-  # the source will be overwritten in the destination
-  # Files that are also in the source but have not changed or have not been
-  # created in the source will not be modified in the destination. If they have
-  # been modified in the destination, they will be out of sync with their source
-  # counterparts.
-  # Files and directories not in the source won't be modified in the destination
+  # {{{ Create the deployment diff mode destination
   mkdir "$dir/deploy_diff"
-  # cp "$dir/app/file 1.txt" "$dir/deploy_diff"
+  mkdir "$dir/deploy_diff/js"
+  mkdir "$dir/deploy_diff/dir_not_in_src"
+  printf 'File in root not to be deployed and will be out of sync' > \
+    "$dir/deploy_diff/file with spaces.txt"
+  printf 'File in root not to be overwritten' > \
+    "$dir/deploy_diff/file_not_in_src.txt"
+  printf '// File in subdir not to be overwritten' > \
+    "$dir/deploy_diff/js/file_not_in_src.js"
+  printf 'File in subdir not to be overwritten' > \
+    "$dir/deploy_diff/dir_not_in_src/file_not_in_src.txt"
+  # }}}
+
+  # {{{ Commit test branch
+  git add "$dir/app"
+  git commit --allow-empty \
+    -m "$(date +'%Y-%m-%d %H:%M:%S') - Testing post-commit hook"
+  # }}}
+
+  # {{{ Check deployment directories
+  chk "$dir/deploy default/file with spaces.txt" 'File in root to be deployed'
+  chk "$dir/deploy default/dir with spaces/file.txt" \
+    'File in subdir to be deployed'
+  chk "$dir/deploy default/js/main.js" 'File in subdir to be deployed'
+  chk "$dir/deploy default/file_not_in_src.txt" \
+    'File in root not to be deployed'
+  # }}}
 else
   printf \
     "${RED}$0 should be run with branch $MAGENTA[test]$RED checked out\n$CLEAR"
